@@ -8,6 +8,14 @@ const Client = new Discord.Client({
 
  const Config = require("../config.js");
 
+var SpotifyWebApi = require('spotify-web-api-node');
+var spotifyApi = new SpotifyWebApi({
+    clientId: Config.SPOTIFY_CLIENT_ID,
+    clientSecret: Config.SPOTIFY_CLIENT_SECRET
+  });
+
+spotifyApi.setAccessToken(Config.SPOTIFY_ACCESS_TOKEN);
+
 // Connect to discord bot
 
 Client.on('ready', readybot);
@@ -26,8 +34,26 @@ function getMessages(message) {
         let manager = message.channel.messages;
         manager.fetch({limit: 100}).then(result => {
             result = result.filter(msg => msg.content.startsWith("fsave"));
-            channel.send("**Query results for fsave:**\n")
-            result.each(msg => channel.send("• " + msg.content.slice(6)));
+            channel.send("**Query results for fsave:**\n");
+            result.each(msg => {
+                let query = msg.content.slice(6);
+                searchSpotifyTracks(query).then(result => {
+                    channel.send('• ' + query);
+                    channel.send(result);
+                });
+            });
         });
     }
+}
+
+async function searchSpotifyTracks(query) {
+    let results = await spotifyApi.searchTracks(query).catch(console.log);
+    return printTrack(results.body.tracks.items[0]);
+}
+
+function printTrack(track) {
+    let artists = track.artists.map(artist => artist.name).join(', '); //string
+    let trackName = track.name;
+    let url = track.external_urls.spotify;
+    return '• ' + artists + " - " + trackName + " (" + url + ")";
 }
