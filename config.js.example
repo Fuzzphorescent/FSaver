@@ -3,5 +3,7 @@ module.exports = {
     SPOTIFY_CLIENT_ID: '<Spotify app client ID>',
     SPOTIFY_CLIENT_SECRET: '<Spotify app client secret>',
     SPOTIFY_ACCESS_TOKEN: '<Spotify access token>',
-    SPOTIFY_REFRESH_TOKEN: '<Spotify refresh token>'
+    SPOTIFY_REFRESH_TOKEN: '<Spotify refresh token>',
+    SPOTIFY_USER_ID: '',
+    SPOTIFY_PLAYLIST_ID: ''
 }
