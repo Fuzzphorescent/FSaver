@@ -8,13 +8,30 @@ const Client = new Discord.Client({
 
  const Config = require("../config.js");
 
+let scopes = ['user-read-private', 'playlist-modify-private', 'playlist-read-private', 'playlist-modify-public%20playlist-read-collaborative'],
+redirectUri = 'http://localhost/';
+
 var SpotifyWebApi = require('spotify-web-api-node');
 var spotifyApi = new SpotifyWebApi({
     clientId: Config.SPOTIFY_CLIENT_ID,
-    clientSecret: Config.SPOTIFY_CLIENT_SECRET
+    clientSecret: Config.SPOTIFY_CLIENT_SECRET,
+    redirectUri: redirectUri
   });
 
+let authURL = spotifyApi.createAuthorizeURL(scopes);
+console.log(authURL);
+
 spotifyApi.setAccessToken(Config.SPOTIFY_ACCESS_TOKEN);
+spotifyApi.setRefreshToken(Config.SPOTIFY_REFRESH_TOKEN);
+
+setInterval(() => {
+    spotifyApi.refreshAccessToken().then(data =>
+        {
+          console.log('Access token refreshed.');
+          spotifyApi.setAccessToken(data.body['access_token']);
+        },
+        err => console.log('Could not refresh access token', err));
+    }, 45 * 60 * 1000);
 
 // Connect to discord bot
 
