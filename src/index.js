@@ -48,7 +48,9 @@ function getMessages(message) {
 
 async function searchSpotifyTracks(query) {
     let results = await spotifyApi.searchTracks(query).catch(console.log);
-    return printTrack(results.body.tracks.items[0]);
+    let topTrack = results.body.tracks.items[0];
+    saveToPlaylist(topTrack);
+    return printTrack(topTrack);
 }
 
 function printTrack(track) {
@@ -56,4 +58,8 @@ function printTrack(track) {
     let trackName = track.name;
     let url = track.external_urls.spotify;
     return '• ' + artists + " - " + trackName + " (" + url + ")";
+}
+
+function saveToPlaylist(track) {
+    spotifyApi.addTracksToPlaylist(Config.SPOTIFY_PLAYLIST_ID, [track.uri]);
 }
