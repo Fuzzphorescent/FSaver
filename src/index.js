@@ -24,6 +24,13 @@ console.log(authURL);
 spotifyApi.setAccessToken(Config.SPOTIFY_ACCESS_TOKEN);
 spotifyApi.setRefreshToken(Config.SPOTIFY_REFRESH_TOKEN);
 
+spotifyApi.refreshAccessToken().then(data =>
+    {
+      console.log('Access token refreshed.');
+      spotifyApi.setAccessToken(data.body['access_token']);
+    },
+    err => console.log('Could not refresh access token', err));
+
 setInterval(() => {
     spotifyApi.refreshAccessToken().then(data =>
         {
@@ -31,7 +38,7 @@ setInterval(() => {
           spotifyApi.setAccessToken(data.body['access_token']);
         },
         err => console.log('Could not refresh access token', err));
-    }, 45 * 60 * 1000);
+}, 45 * 60 * 1000);
 
 // Connect to discord bot
 
