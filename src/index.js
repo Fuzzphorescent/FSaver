@@ -24,14 +24,21 @@ console.log(authURL);
 spotifyApi.setAccessToken(Config.SPOTIFY_ACCESS_TOKEN);
 spotifyApi.setRefreshToken(Config.SPOTIFY_REFRESH_TOKEN);
 
+spotifyApi.refreshAccessToken().then(data =>
+    {
+      console.log('Access token refreshed.');
+      spotifyApi.setAccessToken(data.body['access_token']);
+    },
+    err => console.log('Could not refresh access token', err));
+
 setInterval(() => {
     spotifyApi.refreshAccessToken().then(data =>
         {
-          console.log('Access token refreshed.');
+          console.log('Access token refreshed');
           spotifyApi.setAccessToken(data.body['access_token']);
         },
         err => console.log('Could not refresh access token', err));
-    }, 45 * 60 * 1000);
+}, 45 * 60 * 1000);
 
 // Connect to discord bot
 
@@ -80,3 +87,36 @@ function printTrack(track) {
 function saveToPlaylist(track) {
     spotifyApi.addTracksToPlaylist(Config.SPOTIFY_PLAYLIST_ID, [track.uri]);
 }
+
+// get list of tracks from playlistID
+// get list of duplicates' uri
+// remove duplicates
+
+function removeDuplicateTracks(tracks) {
+    let items = tracks.body.items;
+    let length = items.length;
+    let arrayOfUriObjects = [];
+    for (let i = length - 1; i > 0; i--) {
+        for (let j = i-1; j >= 0; j--) {
+            if (items[i].track.id == items[j].track.id) {
+                let count = 0;
+                for (let k = 0; k < arrayOfUriObjects.length; k++) {
+                    if (arrayOfUriObjects[k] == items[i].track.uri)
+                        break;
+                    else count++;
+                }
+                if (count > 0)
+                        arrayOfUriObjects.push({
+                            uri: items[i].track.uri
+                });
+            }
+        }
+    }
+    console.log(arrayOfUriObjects)
+    spotifyApi.removeTracksFromPlaylist(Config.SPOTIFY_PLAYLIST_ID, arrayOfUriObjects).then(
+        () => console.log('Duplicate tracks removed.'),
+        err => console.log("Failed to remove duplicate tracks" + err)
+    );   
+}
+
+spotifyApi.getPlaylistTracks(Config.SPOTIFY_PLAYLIST_ID).then(result => removeDuplicateTracks(result), console.log);
